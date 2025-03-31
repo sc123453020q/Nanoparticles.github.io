@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Lab - Silver Nanoparticle Synthesis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        .header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+        }
+        .lab-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 20px auto;
+            background: white;
+            border: 2px solid black;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+        .beaker {
+            width: 100px;
+            height: 150px;
+            background: transparent;
+            border: 3px solid black;
+            border-top: none;
+            position: absolute;
+            bottom: 10px;
+        }
+        .liquid {
+            width: 100%;
+            height: 0;
+            background: lightgray;
+            position: absolute;
+            bottom: 0;
+            transition: height 2s, background 2s;
+        }
+        .pipette {
+            width: 10px;
+            height: 60px;
+            background: gray;
+            position: absolute;
+            top: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            transition: top 2s ease-in-out;
+        }
+        .stream {
+            width: 4px;
+            height: 0;
+            background: blue;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            transition: height 2s ease-in-out;
+        }
+        .drop {
+            width: 6px;
+            height: 6px;
+            background: blue;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            display: none;
+            transition: top 0.5s ease-in;
+        }
+        .button {
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            background: #2196F3;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Virtual Lab - Silver Nanoparticle Synthesis</div>
+    <div class="container">
+        <div class="lab-container">
+            <div class="beaker">
+                <div class="liquid" id="liquid"></div>
+            </div>
+            <div class="pipette" id="pipette"></div>
+            <div class="stream" id="stream"></div>
+            <div class="drop" id="drop1"></div>
+            <div class="drop" id="drop2"></div>
+            <div class="drop" id="drop3"></div>
+        </div>
+        <button class="button" onclick="addPVP()">Take PVP</button>
+        <button class="button" onclick="addAgNO3()">Add 3ml AgNO₃</button>
+        <button class="button" onclick="addNaBH4()">Add 3 Drops NaBH₄</button>
+    </div>
+    <script>
+        let addedNaBH4 = false; // Track if NaBH4 has been added
+
+        function resetLiquid() {
+            // If NaBH4 has been added, reset the liquid level when PVP is clicked
+            let liquid = document.getElementById("liquid");
+            if (addedNaBH4) {
+                liquid.style.height = "0px"; // Reset height when PVP is clicked after NaBH4
+                liquid.style.background = "lightgray"; // Reset color to original
+                addedNaBH4 = false; // Reset the NaBH4 flag
+            }
+        }
+
+        function showPipette(color, newHeight) {
+            let pipette = document.getElementById("pipette");
+            let stream = document.getElementById("stream");
+            let liquid = document.getElementById("liquid");
+
+            pipette.style.display = "block";
+            pipette.style.top = "50px";
+            stream.style.display = "block";
+            stream.style.height = "0"; // Start with no height
+            liquid.style.height = liquid.style.height || "0"; // Make sure we start from the current height
+
+            setTimeout(() => {
+                // Stream grows down to the bottom of the beaker
+                stream.style.height = "300px"; 
+
+                setTimeout(() => {
+                    // After the stream reaches the bottom, the liquid will rise
+                    let currentHeight = parseInt(liquid.style.height || "0");
+                    liquid.style.height = `${currentHeight + newHeight}px`; // Accumulate the new height
+
+                    liquid.style.background = color; // Set the color simultaneously with the stream
+
+                    setTimeout(() => {
+                        stream.style.display = "none"; // Stream disappears after 2 seconds
+                        pipette.style.top = "-70px";
+                        setTimeout(() => {
+                            pipette.style.display = "none";
+                        }, 500);
+                    }, 2000); // Stream lasts for 2 seconds
+                }, 1000); // Delay the liquid rise by 1 second
+            }, 500); // Wait 0.5s before starting stream
+        }
+
+        function addPVP() {
+            resetLiquid(); // Reset liquid when PVP is clicked after NaBH4
+            showPipette("lightgray", 20); // Add 20px height for PVP
+        }
+
+        function addAgNO3() {
+            showPipette("lightblue", 50); // Add 50px height for AgNO₃
+        }
+
+        function addNaBH4() {
+            let pipette = document.getElementById("pipette");
+            let liquid = document.getElementById("liquid");
+            let drops = [document.getElementById("drop1"), document.getElementById("drop2"), document.getElementById("drop3")];
+            let delay = 1300;
+    
+            pipette.style.display = "block";
+            pipette.style.top = "50px";
+
+            drops.forEach((drop, index) => {
+                setTimeout(() => {
+                    drop.style.display = "block";
+                    drop.style.top = "100px";
+                    setTimeout(() => {
+                        drop.style.top = "200px";
+                        setTimeout(() => {
+                            drop.style.display = "none";
+                            if (index === 0) {
+                                liquid.style.background = "#EFCD0E"; // After the first drop, set to light yellow
+                            } else if (index === 1) {
+                                liquid.style.background = "#DCA40A"; // After the second drop, set to light orange
+                            } else if (index === 2) {
+                                pipette.style.top = "-70px";
+                                setTimeout(() => {
+                                    pipette.style.display = "none";
+                                    let currentHeight = parseInt(liquid.style.height || "0");
+                                    liquid.style.height = `${currentHeight + 30}px`; // Add 30px for NaBH₄
+                                    liquid.style.background = "#DF891E"; // Change to full NaBH₄ color after the third drop
+                                    addedNaBH4 = true; // Mark that NaBH4 has been added
+                                }, 500);
+                            }
+                        }, 500);
+                    }, 500);
+                 }, index * delay); // Delay between each drop
+            });
+        }
+    </script>
+</body>
+</html>
